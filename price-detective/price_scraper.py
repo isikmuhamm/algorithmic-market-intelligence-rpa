@@ -1,7 +1,24 @@
+"""
+Price Scraper Module
+Handles web scraping operations for Turkish e-commerce platforms.
+Supports: Amazon TR, N11, Trendyol, Pazarama, Ciceksepeti, Hepsiburada
+"""
+
 from bs4 import BeautifulSoup
 from connection import wait_for_page_load
 
+
 def search_amazon(search_term, driver):
+    """
+    Searches Amazon Turkey for products and extracts prices.
+    
+    Args:
+        search_term: Product name to search for
+        driver: Active WebDriver instance
+    
+    Returns:
+        list: List of tuples (product_name, price)
+    """
     url = f"https://www.amazon.com.tr/s?k={search_term}&s=price-asc-rank"
     
     try:
@@ -26,7 +43,18 @@ def search_amazon(search_term, driver):
         print(f"Amazon error: {e}")
         return []
 
+
 def search_n11(search_term, driver):
+    """
+    Searches N11 for products and extracts prices.
+    
+    Args:
+        search_term: Product name to search for
+        driver: Active WebDriver instance
+    
+    Returns:
+        list: List of tuples (product_name, price)
+    """
     url = f"https://www.n11.com/arama?q={search_term.replace(' ', '+')}&srt=PRICE_LOW"
     
     try:
@@ -55,7 +83,18 @@ def search_n11(search_term, driver):
         print(f"N11 error: {e}")
         return []
 
+
 def search_trendyol(search_term, driver):
+    """
+    Searches Trendyol for products and extracts prices.
+    
+    Args:
+        search_term: Product name to search for
+        driver: Active WebDriver instance
+    
+    Returns:
+        list: List of tuples (product_name, price)
+    """
     url = f"https://www.trendyol.com/sr?q={search_term}&sst=PRICE_BY_ASC"
     
     try:
@@ -78,7 +117,18 @@ def search_trendyol(search_term, driver):
         print(f"Trendyol error: {e}")
         return []
 
+
 def search_pazarama(search_term, driver):
+    """
+    Searches Pazarama for products and extracts prices.
+    
+    Args:
+        search_term: Product name to search for
+        driver: Active WebDriver instance
+    
+    Returns:
+        list: List of tuples (product_name, price)
+    """
     url = f"https://www.pazarama.com/arama?q={search_term.replace(' ', '%20')}&siralama=artan-fiyat"
     
     try:
@@ -108,7 +158,18 @@ def search_pazarama(search_term, driver):
         print(f"Pazarama error: {e}")
         return []
 
+
 def search_ciceksepeti(search_term, driver):
+    """
+    Searches Ciceksepeti for products and extracts prices.
+    
+    Args:
+        search_term: Product name to search for
+        driver: Active WebDriver instance
+    
+    Returns:
+        list: List of tuples (product_name, price)
+    """
     url = f"https://www.ciceksepeti.com/arama?query={search_term.replace(' ', '%20')}&qt={search_term.replace(' ', '%20')}&choice=1"
     try:
         driver.get(url)
@@ -116,9 +177,9 @@ def search_ciceksepeti(search_term, driver):
         soup = BeautifulSoup(driver.page_source, 'html.parser')
         products = []
 
-        # Ürün kartlarını bul
+        # Find product cards
         items = soup.find_all("a", attrs={"data-cs-product-box": "true"})
-        print(f"Çiçeksepeti: Found {len(items)} products.")
+        print(f"Ciceksepeti: Found {len(items)} products.")
         
         for item in items[:30]:
             product_name = item.find("span", attrs={"data-cs-pb-name": "true"})
@@ -131,10 +192,21 @@ def search_ciceksepeti(search_term, driver):
         
         return products
     except Exception as e:
-        print(f"Çiçeksepeti error: {e}")
+        print(f"Ciceksepeti error: {e}")
         return []
 
+
 def search_hepsiburada(search_term, driver):
+    """
+    Searches Hepsiburada for products and extracts prices.
+    
+    Args:
+        search_term: Product name to search for
+        driver: Active WebDriver instance
+    
+    Returns:
+        list: List of tuples (product_name, price)
+    """
     url = f"https://www.hepsiburada.com/ara?q={search_term}&siralama=artanfiyat"
     
     try:
@@ -160,8 +232,18 @@ def search_hepsiburada(search_term, driver):
         print(f"Hepsiburada error: {e}")
         return []
 
+
 def get_results(search_term, driver):
-   
+    """
+    Aggregates search results from all supported e-commerce platforms.
+    
+    Args:
+        search_term: Product name to search for
+        driver: Active WebDriver instance
+    
+    Returns:
+        dict: Dictionary with platform names as keys and product lists as values
+    """
     try:
         results = {
             'Amazon': search_amazon(search_term, driver),
@@ -169,7 +251,7 @@ def get_results(search_term, driver):
             'Hepsiburada': search_hepsiburada(search_term, driver),
             'Trendyol': search_trendyol(search_term, driver),
             'Pazarama': search_pazarama(search_term, driver),
-            'Çiçeksepeti': search_ciceksepeti(search_term, driver)
+            'Ciceksepeti': search_ciceksepeti(search_term, driver)
         }
         return results
     except Exception as e:
